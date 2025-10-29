@@ -1,4 +1,4 @@
-# Clojure Tasks: C1–C6
+# Clojure Tasks:
 
 ## C1
 Given an alphabet as a list of 1-character strings and a number `N`. Define a function that returns all possible strings of length `N` composed from this alphabet **with no equal adjacent characters**.  
