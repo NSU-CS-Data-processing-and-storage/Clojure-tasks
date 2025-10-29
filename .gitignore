@@ -1,0 +1,17 @@
+.cpcache/
+target/
+
+.clj-kondo/
+.lsp/
+
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+.lein-*
+.nrepl-port
+
+.DS_Store

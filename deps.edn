@@ -1,0 +1,5 @@
+{:paths ["src" "test"]
+ :deps  {org.clojure/clojure {:mvn/version "1.11.3"}}
+ :aliases {:tests-main {:extra-paths ["test"]
+                        :jvm-opts ["-Dclojure.shutdown-agents=true"]
+                        :main-opts ["-m" "test-runner"]}}}
