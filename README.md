@@ -1,12 +1,15 @@
 # Clojure Tasks: C1, C2, C3
 
 ## C1
-Дан алфавит в виде списка строк длины 1 и число `N`. Определить функцию, которая возвращает все возможные строки длины `N`, составленные из этого алфавита, **без равных соседних символов**.  
-Ограничения: использовать только `map`/`reduce`/`filter`/`remove` и базовые операции над списками (`str`, `cons`, `concat`, и т.п.). **Нельзя** использовать рекурсию, генераторы и `flatten`.  
-Пример: для алфавита `("a" "b" "c")` и `N = 2` результат (с точностью до перестановки): `("ab" "ac" "ba" "bc" "ca" "cb")`.
+
+Given an alphabet as a list of 1-character strings and a number `N`. Define a function that returns all possible strings of length `N` composed from this alphabet **with no equal adjacent characters**.
+Constraints: use only `map`/`reduce`/`filter`/`remove` and basic list operations (`str`, `cons`, `concat`, etc.). **Do not** use recursion, generators, or `flatten`.
+Example: for the alphabet `("a" "b" "c")` and `N = 2`, the result (up to permutation) is `("ab" "ac" "ba" "bc" "ca" "cb")`.
 
 ## C2
-Определить **бесконечную** последовательность простых чисел. Использовать алгоритм **решето Эратосфена** в ленивом (без верхней границы) варианте. Покрыть решение юнит-тестами.
+
+Define an **infinite** sequence of prime numbers using a **Sieve of Eratosthenes** implementation in a lazy, unbounded form. Cover the solution with unit tests.
 
 ## C3
-Реализовать **параллельный** вариант `filter` на основе `future`. Каждый `future` должен обрабатывать **блок** элементов, а не по одному. Входная последовательность может быть конечной или бесконечной, поэтому реализация должна сохранять **ленивость** и давать прирост производительности за счёт параллелизма. Покрыть решение юнит-тестами и продемонстрировать эффективность измерением времени.
+
+Implement a **parallel** variant of `filter` using `future`. Each `future` must process a **block** of elements, not single elements. The input sequence may be finite or infinite, so the implementation must preserve **laziness** and provide performance improvements via parallelism. Cover the solution with unit tests and demonstrate efficiency with timing measurements.
