@@ -89,7 +89,7 @@
   [state ware storage-atom amount]
   (let [bill        (:bill state)
         buffer      (:buffer state)
-        need-one    (get bill ware 0)         ;; сколько этого ресурса нужно на один цикл
+        need-one    (get bill ware 0)         ;; сколько ресурса нужно на один цикл
         have-now    (get buffer ware 0)
         ;; сколько не хватает до одного полного набора по этому ресурсу
         missing     (max 0 (- need-one have-now))
