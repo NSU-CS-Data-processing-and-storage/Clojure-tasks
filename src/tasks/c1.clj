@@ -1,9 +1,11 @@
 (ns tasks.c1)
 
+;; берем последний символ строки
 (defn- last-ch ^String [^String s]
   (when (pos? (count s))
     (.substring s (dec (count s)))))
 
+;; ко всем строкам acc дописывается по букве из alphabet
 (defn- extend-once
   [alphabet acc]
   (reduce
