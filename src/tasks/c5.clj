@@ -4,7 +4,7 @@
  ;; --------------------------Счётчик попыток транзакций--------------------------
 
  (def ^:dynamic *tx-restarts*
-   "Счётчик попыток STM-транзакций."
+   "Счётчик попыток."
    (atom 0))
 
  (defn make-fork
@@ -14,7 +14,7 @@
          :use-count 0}))
 
  (defmacro dosync-counted
-   "dosync, который внутри транзакции увеличивает счётчик попыток."
+   "Внутри транзакции увеличивает счётчик попыток."
    [& body]
    `(dosync
      (swap! *tx-restarts* inc)
@@ -31,7 +31,6 @@
            (dosync-counted
             (if (or (:busy? @left-fork)
                     (:busy? @right-fork))
-              ;; сигнализируем, что транзакция не захватила вилки
               :retry
               (do
                 (alter left-fork  #(-> %
@@ -90,3 +89,24 @@
        :tx-attempts @*tx-restarts*
        :forks (mapv deref forks)})))
 
+;; --------------------------Точка входа--------------------------
+
+(defn print-summary!
+  "Печатает результаты симуляции в человекочитаемом виде."
+  [result]
+  (println "Simulation")
+  (pp/pprint (dissoc result :forks))
+  (println "\nFork usage (id -> use-count):")
+  (doseq [{:keys [id use-count]} (:forks result)]
+    (println id "=>" use-count)))
+
+(defn -main
+  "Точка входа:
+   args: n-philosophers think-ms eat-ms rounds"
+  [& [n-philosophers think-ms eat-ms rounds]]
+  (let [cfg {:n-philosophers (Integer/parseInt (or n-philosophers "5"))
+             :think-ms       (Long/parseLong    (or think-ms "10"))
+             :eat-ms         (Long/parseLong    (or eat-ms "10"))
+             :rounds         (Integer/parseInt (or rounds "50"))}
+        result (run-simulation! cfg)]
+    (print-summary! result)))

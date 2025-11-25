@@ -15,9 +15,9 @@
   [ware notify-step & consumers]
   (let [counter (atom 0 :validator #(>= % 0)),
         worker-state {:storage counter,
-                    :ware ware,
-                    :notify-step notify-step,
-                    :consumers consumers}]
+                      :ware ware,
+                      :notify-step notify-step,
+                      :consumers consumers}]
     {:storage counter,
      :ware ware,
      :worker (agent worker-state)}))
@@ -32,7 +32,7 @@
      :worker - an agent to send notify-msg"
   [amount duration target-storage & ware-amounts]
   (let [bill (apply hash-map ware-amounts),
-        buffer (reduce-kv (fn [acc k _] (assoc acc k 0)) 
+        buffer (reduce-kv (fn [acc k _] (assoc acc k 0))
                           {} bill),
         ;;a state of factory agent:
         ;;  :amount - a number of items to produce per cycle
@@ -54,7 +54,7 @@
    and with given cycle 'duration' in milliseconds
    returns Thread that must be run explicitly"
   [amount duration target-storage]
-  (new Thread 
+  (new Thread
        (fn []
          (Thread/sleep duration)
          (send (target-storage :worker) supply-msg amount)
@@ -67,15 +67,15 @@
   [state amount]
   (swap! (state :storage) #(+ % amount))      ;update counter, could not fail  
   (let [ware (state :ware),
-        cnt @(state :storage),                
+        cnt @(state :storage),
         notify-step (state :notify-step),
         consumers (state :consumers)]
     ;;logging part, notify-step == 0 means no logging
     (when (and (> notify-step 0)
                (> (int (/ cnt notify-step))
                   (int (/ (- cnt amount) notify-step))))
-      (println (.format (new java.text.SimpleDateFormat "hh.mm.ss.SSS") (new java.util.Date)) 
-              "|" ware "amount: " cnt))
+      (println (.format (new java.text.SimpleDateFormat "hh.mm.ss.SSS") (new java.util.Date))
+               "|" ware "amount: " cnt))
     ;;factories notification part
     (when consumers
       (doseq [consumer (shuffle consumers)]
@@ -84,8 +84,6 @@
 
 
 (defn notify-msg
-  "Сообщение, отправляемое агенту-фабрике, когда на склад положили `amount`
-   единиц ресурса `ware`, хранящегося в `storage-atom`."
   [state ware storage-atom amount]
   (let [bill        (:bill state)
         buffer      (:buffer state)
@@ -94,44 +92,36 @@
         ;; сколько не хватает до одного полного набора по этому ресурсу
         missing     (max 0 (- need-one have-now))
 
-        ;; попытка забрать недостающее количество из склада
-        new-buffer  (if (pos? missing)
-                      (let [to-take missing
-                            taken   (if (pos? to-take)
-                                      (try
-                                        ;; возможен уход в минус → сработает валидатор и кинет IllegalStateException
-                                        (swap! storage-atom #(- % to-take))
-                                        to-take
-                                        (catch IllegalStateException _
-                                          ;; недостаточно ресурса – просто ничего не забираем
-                                          0))
-                                      0)]
-                        (if (pos? taken)
-                          (assoc buffer ware (+ have-now taken))
-                          buffer))
-                      buffer)
+        want     (min missing amount)
 
-        ;; проверка, хватает ли всех ресурсов для одного производственного цикла
+        taken    (if (pos? want)
+                   (try
+                     (let [to-take (min want @storage-atom)]
+                       (swap! storage-atom #(- % to-take))
+                       to-take)
+                     (catch IllegalStateException _
+                       0))
+                   0)
+
+        new-buffer (if (pos? taken)
+                     (update buffer ware + taken)
+                     buffer)
+
         can-produce? (every? (fn [[w req]]
                                (>= (get new-buffer w 0) req))
                              bill)]
 
     (if can-produce?
       (do
-        ;; имитируется длительность производственного цикла
         (Thread/sleep (:duration state))
-        ;; после цикла списываются ресурсы из внутреннего буфера
         (let [after-buffer (reduce-kv
                             (fn [b w req] (update b w - req))
                             new-buffer
                             bill)]
-          ;; уведомление склада о готовой продукции
           (send ((:target-storage state) :worker)
                 supply-msg
                 (:amount state))
-          ;; возвращает новое состояние агента с обновлённым буфером
           (assoc state :buffer after-buffer)))
-      ;; цикла пока нет — просто возвращает состояние с обновлённым буфером
       (assoc state :buffer new-buffer))))
 
 
